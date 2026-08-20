@@ -165,13 +165,10 @@
     const totalAvailableHours = monthlyLegalHours * people.length;
     const totalTimeInvestedPct = totalAvailableHours > 0 ? (totalMonthlyProcessHours / totalAvailableHours) * 100 : 0;
 
-    // KPIs de la solución (calculados sobre el año 1, después de la gráfica comparativa)
-    const annualSavingsWithSolution = totalAnnualProcessCostYear1 - totalSolutionInvestment;
-    const annualSavingsPct = totalAnnualProcessCostYear1 > 0 ? (annualSavingsWithSolution / totalAnnualProcessCostYear1) * 100 : 0;
-    const monthlySavingsPostImplementation = totalMonthlyProcessCost;
-
     // Gasto real en paralelo: durante la ejecución se sigue pagando el proceso Y la solución al mismo tiempo.
     // Después de la ejecución, el gasto real se detiene (la solución ya reemplazó al proceso).
+    // Esta es la base de TODOS los cálculos de ahorro/payback del informe — nunca se compara
+    // el proceso solo contra el costo de la solución sola, siempre contra el gasto real combinado.
     const realSpendSeries = [];
     for (let m = 0; m < totalMonths; m++) {
       realSpendSeries.push(m < executionMonths ? monthlyProcessCostSeries[m] + solutionMonthlyCost : 0);
@@ -184,6 +181,11 @@
     }
     const lastExecIdx = Math.min(executionMonths, totalMonths) - 1;
     const totalRealInvestment = lastExecIdx >= 0 ? cumulativeRealSpendSeries[lastExecIdx] : 0;
+
+    // KPIs de la solución (calculados sobre el año 1, después de la gráfica comparativa)
+    const annualSavingsWithSolution = totalAnnualProcessCostYear1 - totalRealInvestment;
+    const annualSavingsPct = totalAnnualProcessCostYear1 > 0 ? (annualSavingsWithSolution / totalAnnualProcessCostYear1) * 100 : 0;
+    const monthlySavingsPostImplementation = totalMonthlyProcessCost;
 
     // Payback: primer mes en que el gasto acumulado del proceso (si nunca se hubiera adoptado la solución)
     // supera el gasto real total pagado (proceso + solución durante la implementación).
@@ -289,6 +291,7 @@
     const solutionGrid = $("#kpiGridSolution");
     const {
       totalSolutionInvestment,
+      totalRealInvestment,
       annualSavingsWithSolution,
       annualSavingsPct,
       monthlySavingsPostImplementation,
@@ -301,17 +304,17 @@
 
     const cards = [
       {
-        label: "Inversión total en la solución",
-        value: fmtMoney(totalSolutionInvestment),
+        label: "Costo total de implementación",
+        value: fmtMoney(totalRealInvestment),
         cls: "neutral",
-        sub: `${executionMonths} ${executionMonths === 1 ? "mes" : "meses"} de implementación`,
+        sub: `${fmtMoney(totalSolutionInvestment)} de la solución + proceso pagado en paralelo durante ${executionMonths} ${executionMonths === 1 ? "mes" : "meses"}`,
       },
       {
         label: "Ahorro anual con la solución",
         value: hasSolution ? fmtMoney(annualSavingsWithSolution) : "—",
         cls: annualSavingsWithSolution >= 0 ? "positive" : "negative",
         sub: hasSolution
-          ? "Costo anual del proceso vs. inversión total en la solución"
+          ? "Costo anual del proceso vs. costo total de implementación"
           : "Ingresa el costo de la solución",
       },
       {
@@ -527,7 +530,7 @@
     const chartH = H - padT - padB;
 
     const processData = totals.cumulativeProcessCostSeries;
-    const solutionData = totals.cumulativeSolutionCostSeries;
+    const solutionData = totals.cumulativeRealSpendSeries;
     const n = processData.length;
     const maxVal = Math.max(...processData, ...solutionData, 1) * 1.15;
 
@@ -575,7 +578,7 @@
 
     svg.appendChild(svgEl("rect", { x: padL + 140, y: legendY, width: 10, height: 10, fill: "#60a5fa", rx: 2 }));
     const l2 = svgEl("text", { x: padL + 156, y: legendY + 9, fill: "#93a0c2", "font-size": 11 });
-    l2.textContent = "Costo de la solución";
+    l2.textContent = "Gasto real (implementación)";
     svg.appendChild(l2);
 
     // GAP al final de la proyección: línea punteada uniendo ambas curvas + ahorro en $ y %
@@ -739,7 +742,7 @@
 
     $("#noteCompare").textContent =
       totals.solutionMonthlyCost > 0
-        ? `La solución acumula su costo solo durante los primeros ${totals.executionMonths} ${totals.executionMonths === 1 ? "mes" : "meses"} (implementación) y luego se mantiene plana en ${fmtMoney(totals.totalSolutionInvestment)}, mientras el costo del proceso sigue creciendo.`
+        ? `Durante los primeros ${totals.executionMonths} ${totals.executionMonths === 1 ? "mes" : "meses"} (implementación) se paga el proceso Y la solución al mismo tiempo; el gasto real acumula hasta ${fmtMoney(totals.totalRealInvestment)} y luego se mantiene plano, mientras el costo del proceso sigue creciendo.`
         : "Ingresa el costo mensual de la solución arriba para ver el comparativo acumulado.";
   }
 

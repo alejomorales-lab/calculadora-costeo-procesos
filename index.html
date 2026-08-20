@@ -103,6 +103,27 @@
     <div class="kpi-grid" id="kpiGridSolution"></div>
   </section>
 
+  <!-- DESGLOSE MES A MES DEL PAYBACK -->
+  <section class="card hidden" id="paybackTableWrap">
+    <h2>Desglose mes a mes del payback</h2>
+    <div class="table-wrap">
+      <table class="payback-table">
+        <thead>
+          <tr>
+            <th>Mes</th>
+            <th>Costo proceso</th>
+            <th>Costo solución</th>
+            <th>Gasto real acumulado</th>
+            <th>Costo proceso acumulado (sin intervención)</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="paybackTableBody"></tbody>
+      </table>
+    </div>
+    <p class="chart-note" id="paybackTableNote"></p>
+  </section>
+
   <!-- REPORTE -->
   <section class="card no-print">
     <button id="btnGeneratePDF" class="btn-report">

@@ -168,19 +168,36 @@
     const annualSavingsPct = totalAnnualProcessCostYear1 > 0 ? (annualSavingsWithSolution / totalAnnualProcessCostYear1) * 100 : 0;
     const monthlySavingsPostImplementation = totalMonthlyProcessCost;
 
-    // Payback: primer mes en que el gasto acumulado del proceso supera la inversión total de la solución
+    // Gasto real en paralelo: durante la ejecución se sigue pagando el proceso Y la solución al mismo tiempo.
+    // Después de la ejecución, el gasto real se detiene (la solución ya reemplazó al proceso).
+    const realSpendSeries = [];
+    for (let m = 0; m < totalMonths; m++) {
+      realSpendSeries.push(m < executionMonths ? monthlyProcessCostSeries[m] + solutionMonthlyCost : 0);
+    }
+    const cumulativeRealSpendSeries = [];
+    let runningReal = 0;
+    for (let m = 0; m < totalMonths; m++) {
+      runningReal += realSpendSeries[m];
+      cumulativeRealSpendSeries.push(runningReal);
+    }
+    const lastExecIdx = Math.min(executionMonths, totalMonths) - 1;
+    const totalRealInvestment = lastExecIdx >= 0 ? cumulativeRealSpendSeries[lastExecIdx] : 0;
+
+    // Payback: primer mes en que el gasto acumulado del proceso (si nunca se hubiera adoptado la solución)
+    // supera el gasto real total pagado (proceso + solución durante la implementación).
     let paybackMonths = null;
-    if (solutionMonthlyCost > 0 && totalSolutionInvestment > 0) {
-      const idx = cumulativeProcessCostSeries.findIndex((v) => v >= totalSolutionInvestment);
+    if (solutionMonthlyCost > 0 && totalRealInvestment > 0) {
+      const idx = cumulativeProcessCostSeries.findIndex((v) => v >= totalRealInvestment);
       if (idx === -1) {
         paybackMonths = null;
       } else {
         const prevCum = idx === 0 ? 0 : cumulativeProcessCostSeries[idx - 1];
         const monthCost = monthlyProcessCostSeries[idx];
-        const fraction = monthCost > 0 ? (totalSolutionInvestment - prevCum) / monthCost : 0;
+        const fraction = monthCost > 0 ? (totalRealInvestment - prevCum) / monthCost : 0;
         paybackMonths = idx + fraction;
       }
     }
+    const paybackMonthIndex = paybackMonths !== null ? Math.floor(paybackMonths) : null;
 
     return {
       perPersonResults,
@@ -194,14 +211,18 @@
       monthlySolutionCostSeries,
       cumulativeProcessCostSeries,
       cumulativeSolutionCostSeries,
+      realSpendSeries,
+      cumulativeRealSpendSeries,
       totalAnnualProcessCostYear1,
       totalAnnualHours,
       totalTimeInvestedPct,
       totalSolutionInvestment,
+      totalRealInvestment,
       annualSavingsWithSolution,
       annualSavingsPct,
       monthlySavingsPostImplementation,
       paybackMonths,
+      paybackMonthIndex,
     };
   }
 
@@ -312,7 +333,7 @@
         value: paybackMonths ? fmtHours(paybackMonths) + " meses" : "—",
         cls: "neutral",
         sub: paybackMonths
-          ? "Mes en que el gasto del proceso supera la inversión en la solución"
+          ? "Incluye el proceso pagado en paralelo durante la implementación (ver tabla abajo)"
           : "No aplica con los datos actuales",
       },
     ];
@@ -328,6 +349,60 @@
       `;
       solutionGrid.appendChild(el);
     });
+  }
+
+  // ---------- Tabla de desglose mes a mes (payback) ----------
+
+  function renderPaybackTable(totals) {
+    const wrap = $("#paybackTableWrap");
+    const tbody = $("#paybackTableBody");
+    const note = $("#paybackTableNote");
+    if (!wrap || !tbody) return;
+
+    const {
+      solutionMonthlyCost,
+      executionMonths,
+      monthlyProcessCostSeries,
+      monthlySolutionCostSeries,
+      cumulativeProcessCostSeries,
+      realSpendSeries,
+      cumulativeRealSpendSeries,
+      paybackMonthIndex,
+      paybackMonths,
+    } = totals;
+
+    if (solutionMonthlyCost <= 0) {
+      wrap.classList.add("hidden");
+      return;
+    }
+    wrap.classList.remove("hidden");
+
+    tbody.innerHTML = "";
+
+    monthlyProcessCostSeries.forEach((processCost, i) => {
+      const isExecution = i < executionMonths;
+      const solutionCostThisMonth = isExecution ? solutionMonthlyCost : 0;
+      const realCumulative = cumulativeRealSpendSeries[i];
+      const baselineCumulative = cumulativeProcessCostSeries[i];
+      const isPaybackRow = paybackMonthIndex !== null && i === paybackMonthIndex;
+
+      const tr = document.createElement("tr");
+      if (isPaybackRow) tr.className = "payback-row";
+
+      tr.innerHTML = `
+        <td>${monthLabel(i)}</td>
+        <td>${fmtMoney(processCost)}</td>
+        <td>${solutionCostThisMonth > 0 ? fmtMoney(solutionCostThisMonth) : "—"}</td>
+        <td>${fmtMoney(realCumulative)}</td>
+        <td>${fmtMoney(baselineCumulative)}</td>
+        <td>${isPaybackRow ? "✓ Punto de equilibrio" : (isExecution ? "Implementación" : "")}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    note.textContent = paybackMonths
+      ? `Durante la implementación (${executionMonths} ${executionMonths === 1 ? "mes" : "meses"}) se paga el proceso Y la solución al mismo tiempo. El "gasto real acumulado" se congela al terminar la implementación; el punto de equilibrio es el mes en que el "costo proceso acumulado (si no se interviene)" lo supera.`
+      : `Con los datos actuales, el proceso nunca supera el gasto real invertido dentro del periodo proyectado. Prueba aumentando los años a proyectar.`;
   }
 
   // ---------- Charts (hand-drawn SVG, no dependencies) ----------
@@ -563,6 +638,7 @@
     renderProjectionChart(totals);
     renderCompareChart(totals);
     renderSolutionKPIs(totals);
+    renderPaybackTable(totals);
     renderNotes(totals);
   }
 

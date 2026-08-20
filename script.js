@@ -130,13 +130,15 @@
     const executionMonths = parseInt($("#executionMonths").value, 10) || 1;
 
     const annualIncreaseRate = settings.annualIncrease / 100;
-    const monthlyGrowthRate = Math.pow(1 + annualIncreaseRate, 1 / 12) - 1;
 
     const totalMonths = years * 12;
     const monthlyProcessCostSeries = [];
     const monthlySolutionCostSeries = [];
     for (let m = 0; m < totalMonths; m++) {
-      const processCostThisMonth = totalMonthlyProcessCost * Math.pow(1 + monthlyGrowthRate, m);
+      // Escalón anual: el costo se mantiene fijo durante los 12 meses del año y solo sube
+      // al iniciar el siguiente año (no se reparte el incremento mes a mes).
+      const yearIndex = Math.floor(m / 12);
+      const processCostThisMonth = totalMonthlyProcessCost * Math.pow(1 + annualIncreaseRate, yearIndex);
       monthlyProcessCostSeries.push(processCostThisMonth);
       // La solución solo genera costo durante sus meses de ejecución (inversión de implementación);
       // después de eso no se repite más.

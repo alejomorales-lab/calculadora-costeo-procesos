@@ -158,8 +158,14 @@
     const totalAnnualHours = totalMonthlyProcessHours * 12;
     const totalSolutionInvestment = executionMonths * solutionMonthlyCost;
 
+    // % total de tiempo laboral (de todas las personas) dedicado al proceso
+    const monthlyLegalHours = settings.weeklyHours * WEEKS_PER_MONTH;
+    const totalAvailableHours = monthlyLegalHours * people.length;
+    const totalTimeInvestedPct = totalAvailableHours > 0 ? (totalMonthlyProcessHours / totalAvailableHours) * 100 : 0;
+
     // KPIs de la solución (calculados sobre el año 1, después de la gráfica comparativa)
     const annualSavingsWithSolution = totalAnnualProcessCostYear1 - totalSolutionInvestment;
+    const annualSavingsPct = totalAnnualProcessCostYear1 > 0 ? (annualSavingsWithSolution / totalAnnualProcessCostYear1) * 100 : 0;
     const monthlySavingsPostImplementation = totalMonthlyProcessCost;
 
     // Payback: primer mes en que el gasto acumulado del proceso supera la inversión total de la solución
@@ -190,8 +196,10 @@
       cumulativeSolutionCostSeries,
       totalAnnualProcessCostYear1,
       totalAnnualHours,
+      totalTimeInvestedPct,
       totalSolutionInvestment,
       annualSavingsWithSolution,
+      annualSavingsPct,
       monthlySavingsPostImplementation,
       paybackMonths,
     };
@@ -212,11 +220,11 @@
   // ---------- KPI cards ----------
 
   function renderKPIs(totals) {
-    const { totalAnnualProcessCostYear1, totalAnnualHours, totalMonthlyProcessCost } = totals;
+    const { totalAnnualProcessCostYear1, totalAnnualHours, totalMonthlyProcessCost, totalTimeInvestedPct } = totals;
 
     const cards = [
       {
-        label: "Inversión económica anual (proceso)",
+        label: "Costo anual del proceso",
         value: fmtMoney(totalAnnualProcessCostYear1),
         cls: "neutral",
         sub: "Costo total año 1",
@@ -232,6 +240,12 @@
         value: fmtMoney(totalMonthlyProcessCost),
         cls: "neutral",
         sub: "Todas las personas incluidas",
+      },
+      {
+        label: "Porcentaje total de tiempo dedicada al proceso",
+        value: fmtHours(totalTimeInvestedPct) + "%",
+        cls: "neutral",
+        sub: "Sobre el tiempo laboral de todas las personas",
       },
     ];
 
@@ -253,6 +267,7 @@
     const {
       totalSolutionInvestment,
       annualSavingsWithSolution,
+      annualSavingsPct,
       monthlySavingsPostImplementation,
       paybackMonths,
       solutionMonthlyCost,
@@ -274,6 +289,14 @@
         cls: annualSavingsWithSolution >= 0 ? "positive" : "negative",
         sub: hasSolution
           ? "Costo anual del proceso vs. inversión total en la solución"
+          : "Ingresa el costo de la solución",
+      },
+      {
+        label: "Porcentaje ahorro anual con la solución",
+        value: hasSolution ? fmtHours(annualSavingsPct) + "%" : "—",
+        cls: annualSavingsPct >= 0 ? "positive" : "negative",
+        sub: hasSolution
+          ? "Ahorro anual como % del costo anual del proceso"
           : "Ingresa el costo de la solución",
       },
       {
@@ -422,7 +445,7 @@
     clearSvg(svg);
 
     const W = 600, H = 300;
-    const padL = 60, padR = 20, padT = 30, padB = 40;
+    const padL = 60, padR = 108, padT = 30, padB = 40;
     const chartW = W - padL - padR;
     const chartH = H - padT - padB;
 
@@ -477,6 +500,36 @@
     const l2 = svgEl("text", { x: padL + 156, y: legendY + 9, fill: "#93a0c2", "font-size": 11 });
     l2.textContent = "Costo de la solución";
     svg.appendChild(l2);
+
+    // GAP al final de la proyección: línea punteada uniendo ambas curvas + ahorro en $ y %
+    const lastIdx = n - 1;
+    const xLast = xFor(lastIdx);
+    const processYLast = processPoints[lastIdx][1];
+    const solutionYLast = solutionPoints[lastIdx][1];
+    const gapValue = processData[lastIdx] - solutionData[lastIdx];
+    const gapPct = processData[lastIdx] > 0 ? (gapValue / processData[lastIdx]) * 100 : 0;
+
+    if (Math.abs(processYLast - solutionYLast) > 1) {
+      svg.appendChild(svgEl("line", {
+        x1: xLast, x2: xLast, y1: processYLast, y2: solutionYLast,
+        stroke: "#93a0c2", "stroke-width": 1.5, "stroke-dasharray": "4,4",
+      }));
+    }
+
+    const gapMidY = Math.min(Math.max((processYLast + solutionYLast) / 2, padT + 22), padT + chartH - 8);
+    const gapLabelX = xLast + 10;
+
+    const gapTitle = svgEl("text", {
+      x: gapLabelX, y: gapMidY - 6, fill: "#e8ecf7", "font-size": 11, "font-weight": 700,
+    });
+    gapTitle.textContent = "GAP: " + shortMoney(gapValue);
+    svg.appendChild(gapTitle);
+
+    const gapSub = svgEl("text", {
+      x: gapLabelX, y: gapMidY + 9, fill: "#6ee7b7", "font-size": 10.5, "font-weight": 600,
+    });
+    gapSub.textContent = fmtHours(gapPct) + "% ahorro";
+    svg.appendChild(gapSub);
   }
 
   function shortMoney(n) {

@@ -204,6 +204,38 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   cursor: pointer;
 }
 
+.btn-report {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--bg-elev);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--text);
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.btn-report-icon {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  color: var(--accent-2);
+}
+
+.btn-report:hover {
+  border-color: var(--accent-2);
+  background: #1c294a;
+}
+
+.btn-report:active { transform: scale(0.98); }
+
 .people-list {
   display: flex;
   flex-direction: column;
@@ -445,6 +477,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   .person-result strong { color: #047857; }
 
   svg [fill="#93a0c2"] { fill: #4b5563 !important; }
+  svg [stroke="#93a0c2"] { stroke: #9ca3af !important; }
   svg [fill="#e8ecf7"] { fill: #111827 !important; }
   svg [stroke="#263257"] { stroke: #e5e7eb !important; }
   svg [stroke="#6ee7b7"], svg [fill="#6ee7b7"] { stroke: #059669 !important; fill: #059669 !important; }

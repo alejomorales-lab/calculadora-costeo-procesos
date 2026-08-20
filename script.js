@@ -304,6 +304,13 @@
 
     const cards = [
       {
+        label: "Costo total de la solución",
+        value: fmtMoney(totalSolutionInvestment),
+        cls: "neutral",
+        sub: `${executionMonths} ${executionMonths === 1 ? "mes" : "meses"} de implementación`,
+        highlight: true,
+      },
+      {
         label: "Costo total de implementación",
         value: fmtMoney(totalRealInvestment),
         cls: "neutral",
@@ -346,7 +353,7 @@
     solutionGrid.innerHTML = "";
     cards.forEach((c) => {
       const el = document.createElement("div");
-      el.className = "kpi-card";
+      el.className = "kpi-card" + (c.highlight ? " kpi-card-highlight" : "");
       el.innerHTML = `
         <div class="kpi-label">${c.label}</div>
         <div class="kpi-value ${c.cls}">${c.value}</div>

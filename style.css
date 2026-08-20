@@ -472,7 +472,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 .print-only { display: none; }
 
 @media print {
-  @page { margin: 14mm; }
+  @page { margin: 12mm; }
 
   html, body {
     background: #ffffff;
@@ -527,9 +527,9 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   }
 
   #printSummary {
-    margin-bottom: 20px;
-    break-after: page;
-    page-break-after: always;
+    margin-bottom: 16px;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   #printSummary h2 {
@@ -576,19 +576,64 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   main {
     max-width: 100%;
     padding: 0;
-    gap: 12px;
+    gap: 8px;
   }
 
   .card {
     background: #ffffff;
     border: 1px solid #d1d5db;
     box-shadow: none;
+    padding: 12px;
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
-  .card h2 { color: #111827; }
+  .card h2 {
+    color: #111827;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
   .subsection-title { color: #374151; }
+
+  .kpi-grid { gap: 8px; }
+
+  .kpi-card { padding: 10px 12px; }
+
+  .kpi-label { font-size: 10px; margin-bottom: 4px; }
+
+  .kpi-value { font-size: 16px; }
+
+  .kpi-sub { font-size: 10px; }
+
+  .chart-note { font-size: 10.5px; margin-top: 6px; }
+
+  .chart-wrap {
+    display: flex;
+    justify-content: center;
+  }
+
+  .chart-wrap svg {
+    width: 460px;
+    height: 230px;
+    max-width: 100%;
+  }
+
+  /* La tabla de payback puede ser larga: se le permite paginar por fila
+     en vez de forzar todo el bloque a la página siguiente. */
+  #paybackTableCard {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  .payback-table thead {
+    display: table-header-group;
+  }
+
+  .payback-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 
   .field-label, .kpi-label, .chart-note, .field-hint, .person-result { color: #4b5563; }
 

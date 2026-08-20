@@ -366,7 +366,7 @@
   // ---------- Tabla de desglose mes a mes (payback) ----------
 
   function renderPaybackTable(totals) {
-    const wrap = $("#paybackTableWrap");
+    const wrap = $("#paybackTableCard");
     const tbody = $("#paybackTableBody");
     const note = $("#paybackTableNote");
     if (!wrap || !tbody) return;
@@ -624,13 +624,15 @@
     if (!svg) return;
     clearSvg(svg);
 
+    const card = $("#paybackChartCard");
     const note = $("#notePayback");
     const { solutionMonthlyCost, paybackMonths, executionMonths } = totals;
 
     if (solutionMonthlyCost <= 0) {
-      if (note) note.textContent = "Ingresa el costo mensual de la solución arriba para ver el punto de equilibrio.";
+      if (card) card.classList.add("hidden");
       return;
     }
+    if (card) card.classList.remove("hidden");
     if (paybackMonths === null) {
       if (note) note.textContent = "Con los datos actuales, el punto de equilibrio no se alcanza dentro del periodo proyectado. Prueba aumentando los años a proyectar.";
       return;

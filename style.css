@@ -336,6 +336,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 .kpi-value.positive { color: var(--accent); }
 .kpi-value.negative { color: var(--danger); }
 .kpi-value.neutral { color: var(--accent-2); }
+.kpi-card-highlight .kpi-value { color: var(--warn); }
 
 .kpi-sub {
   font-size: 11.5px;
@@ -605,6 +606,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   .kpi-value.positive { color: #047857; }
   .kpi-value.negative { color: #b91c1c; }
   .kpi-value.neutral { color: #1d4ed8; }
+  .kpi-card-highlight .kpi-value { color: #b45309; }
 
   .person-result strong { color: #047857; }
 

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0f172a">
+<title>Calculadora de Costeo de Procesos</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-title">
+    <span class="logo">₡</span>
+    <h1>Calculadora de Costeo de Procesos</h1>
+  </div>
+  <button id="btnSettings" class="icon-btn" aria-label="Configuración" title="Configuración">⚙️</button>
+</header>
+
+<main>
+
+  <!-- PROCESO -->
+  <section class="card">
+    <label class="field-label" for="processName">Nombre del proceso</label>
+    <input type="text" id="processName" placeholder="Ej. Conciliación bancaria mensual" value="Mi proceso">
+  </section>
+
+  <!-- PERSONAS -->
+  <section class="card">
+    <div class="card-header">
+      <h2>Personas involucradas</h2>
+      <button id="btnAddPerson" class="btn-primary small">+ Agregar persona</button>
+    </div>
+    <div id="peopleList" class="people-list"></div>
+  </section>
+
+  <!-- PROYECCIÓN Y SOLUCIÓN -->
+  <section class="card">
+    <h2>Proyección y solución</h2>
+    <div class="grid-2">
+      <div class="field">
+        <label class="field-label" for="projectionYears">Años a proyectar</label>
+        <select id="projectionYears">
+          <option value="1" selected>1 año</option>
+          <option value="2">2 años</option>
+          <option value="3">3 años</option>
+          <option value="4">4 años</option>
+          <option value="5">5 años</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label" for="solutionCost">Costo mensual de la solución</label>
+        <div class="input-prefix">
+          <span>$</span>
+          <input type="number" id="solutionCost" min="0" step="1000" placeholder="0" value="0">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="executionMonths">Tiempo de ejecución de la solución</label>
+        <select id="executionMonths">
+          <option value="1">1 mes</option>
+          <option value="2">2 meses</option>
+          <option value="3" selected>3 meses</option>
+          <option value="4">4 meses</option>
+          <option value="5">5 meses</option>
+          <option value="6">6 meses</option>
+          <option value="7">7 meses</option>
+          <option value="8">8 meses</option>
+          <option value="9">9 meses</option>
+          <option value="10">10 meses</option>
+          <option value="11">11 meses</option>
+          <option value="12">12 meses</option>
+        </select>
+        <span class="field-hint">Es el número de meses en que se paga el costo mensual de la solución (inversión de implementación). Al terminar, ese costo no se repite más.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- KPIs -->
+  <section class="kpi-grid" id="kpiGrid"></section>
+
+  <!-- GRAFICAS -->
+  <section class="card">
+    <h2>Costo de proceso actual en el tiempo</h2>
+    <div class="chart-wrap">
+      <svg id="chartProjection" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+    <p class="chart-note" id="noteIncrement"></p>
+  </section>
+
+  <section class="card">
+    <h2>Inversión acumulada: proceso vs. solución</h2>
+    <div class="chart-wrap">
+      <svg id="chartCompare" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+    <p class="chart-note" id="noteCompare"></p>
+  </section>
+
+  <!-- KPIs de resultado de la solución -->
+  <section class="card">
+    <h2>Resultados de la solución</h2>
+    <div class="kpi-grid" id="kpiGridSolution"></div>
+  </section>
+
+  <!-- REPORTE -->
+  <section class="card no-print">
+    <button id="btnGeneratePDF" class="btn-primary full">📄 Generar PDF del reporte</button>
+  </section>
+
+</main>
+
+<div id="printHeader" class="print-only">
+  <h1>Calculadora de Costeo de Procesos</h1>
+  <p id="printMeta"></p>
+</div>
+
+<!-- MODAL CONFIGURACION -->
+<div id="settingsModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Configuración general</h2>
+      <button id="btnCloseSettings" class="icon-btn" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label class="field-label" for="cfgFactor">Factor prestacional (salario → costo empresa)</label>
+        <input type="number" id="cfgFactor" min="1" step="0.01" value="1.55">
+        <span class="field-hint">Multiplicador estándar para contrato a término indefinido, salario ordinario, bajo legislación colombiana (prestaciones sociales + parafiscales + seguridad social + provisiones).</span>
+      </div>
+      <div class="field">
+        <label class="field-label" for="cfgWeeklyHours">Horas laborales semanales legales</label>
+        <input type="number" id="cfgWeeklyHours" min="1" step="1" value="42">
+        <span class="field-hint">Jornada máxima legal vigente (Ley 2101 de 2021 — reducción gradual a 42h desde julio de 2026).</span>
+      </div>
+      <div class="field">
+        <label class="field-label" for="cfgAnnualIncrease">Incremento salarial anual presupuestado (%)</label>
+        <input type="number" id="cfgAnnualIncrease" min="0" step="0.1" value="6">
+        <span class="field-hint">Usado para proyectar el crecimiento del costo del proceso año a año.</span>
+      </div>
+      <div class="field">
+        <label class="field-label" for="cfgWorkDaysMonth">Días laborales por mes (si se ingresan horas/día)</label>
+        <input type="number" id="cfgWorkDaysMonth" min="1" step="0.1" value="21.67">
+        <span class="field-hint">Promedio de días hábiles al mes en Colombia.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button id="btnResetDefaults" class="btn-secondary">Restaurar valores por defecto</button>
+      <button id="btnApplySettings" class="btn-primary">Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<template id="personRowTemplate">
+  <div class="person-row" data-id="">
+    <div class="person-row-header">
+      <input type="text" class="person-name" placeholder="Nombre / rol">
+      <button class="icon-btn remove-person" aria-label="Eliminar persona" title="Eliminar">🗑️</button>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label class="field-label">Salario mensual</label>
+        <div class="input-prefix">
+          <span>$</span>
+          <input type="number" class="person-salary" min="0" step="10000" value="0">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Horas dedicadas al proceso</label>
+        <div class="hours-input">
+          <input type="number" class="person-hours" min="0" step="0.5" value="0">
+          <select class="person-hours-unit">
+            <option value="day">por día</option>
+            <option value="week">por semana</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="person-result">
+      <span class="person-result-item"><strong class="res-monthly-cost">$0</strong> costo mensual empresa</span>
+      <span class="person-result-item"><strong class="res-monthly-hours">0</strong> h/mes en el proceso</span>
+      <span class="person-result-item"><strong class="res-time-pct">0%</strong> de su tiempo laboral</span>
+    </div>
+  </div>
+</template>
+
+<script src="script.js"></script>
+</body>
+</html>

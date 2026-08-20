@@ -21,13 +21,13 @@
 <main>
 
   <!-- PROCESO -->
-  <section class="card">
+  <section class="card no-print">
     <label class="field-label" for="processName">Nombre del proceso</label>
     <input type="text" id="processName" placeholder="Ej. Conciliación bancaria mensual" value="Mi proceso">
   </section>
 
   <!-- PERSONAS -->
-  <section class="card">
+  <section class="card no-print">
     <div class="card-header">
       <h2>Personas involucradas</h2>
       <button id="btnAddPerson" class="btn-primary small">+ Agregar persona</button>
@@ -36,7 +36,7 @@
   </section>
 
   <!-- PROYECCIÓN Y SOLUCIÓN -->
-  <section class="card">
+  <section class="card no-print">
     <h2>Proyección y solución</h2>
     <div class="grid-2">
       <div class="field">
@@ -145,8 +145,26 @@
 </main>
 
 <div id="printHeader" class="print-only">
-  <h1>Calculadora de Costeo de Procesos</h1>
+  <p class="print-kicker">Calculadora de Costeo de Procesos · Informe ejecutivo</p>
+  <h1 id="printProcessName">Mi proceso</h1>
   <p id="printMeta"></p>
+</div>
+
+<div id="printSummary" class="print-only">
+  <h2>Resumen del proceso</h2>
+  <table class="print-summary-table">
+    <thead>
+      <tr>
+        <th>Persona</th>
+        <th>Salario mensual</th>
+        <th>Dedicación</th>
+        <th>% tiempo</th>
+        <th>Costo mensual empresa</th>
+      </tr>
+    </thead>
+    <tbody id="printPeopleBody"></tbody>
+  </table>
+  <p class="print-params" id="printParams"></p>
 </div>
 
 <!-- MODAL CONFIGURACION -->

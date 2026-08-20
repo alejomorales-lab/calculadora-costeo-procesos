@@ -790,7 +790,41 @@
   function generatePDF() {
     const processName = $("#processName").value || "Proceso sin nombre";
     const today = new Date().toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" });
-    $("#printMeta").textContent = `Proceso: ${processName} — Generado el ${today}`;
+
+    $("#printProcessName").textContent = processName;
+    $("#printMeta").textContent = `Generado el ${today}`;
+
+    const totals = computeTotals();
+
+    const peopleBody = $("#printPeopleBody");
+    peopleBody.innerHTML = "";
+    if (totals.perPersonResults.length === 0) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="5">Sin personas registradas</td>`;
+      peopleBody.appendChild(tr);
+    } else {
+      totals.perPersonResults.forEach(({ person, monthlyCompanyCost, timeInvestedPct }) => {
+        const dedication = `${person.hours} ${person.unit === "day" ? "h/día" : "h/semana"}`;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${person.name || "Sin nombre"}</td>
+          <td>${fmtMoney(person.salary)}</td>
+          <td>${dedication}</td>
+          <td>${fmtHours(timeInvestedPct)}%</td>
+          <td>${fmtMoney(monthlyCompanyCost)}</td>
+        `;
+        peopleBody.appendChild(tr);
+      });
+    }
+
+    const years = $("#projectionYears").value;
+    const solutionCost = fmtMoney(totals.solutionMonthlyCost);
+    const executionMonths = $("#executionMonths").value;
+    $("#printParams").innerHTML =
+      `<strong>Parámetros:</strong> Proyección a ${years} ${years === "1" ? "año" : "años"} · ` +
+      `Costo mensual de la solución: ${solutionCost} · ` +
+      `Tiempo de ejecución: ${executionMonths} ${executionMonths === "1" ? "mes" : "meses"}`;
+
     window.print();
   }
 

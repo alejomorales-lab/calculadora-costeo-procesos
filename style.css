@@ -105,6 +105,15 @@ main {
   font-weight: 600;
 }
 
+.subsection-title {
+  font-size: 13px;
+  margin: 20px 0 12px 0;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
 .card-header {
   display: flex;
   align-items: center;
@@ -508,6 +517,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   }
 
   .card h2 { color: #111827; }
+  .subsection-title { color: #374151; }
 
   .field-label, .kpi-label, .chart-note, .field-hint, .person-result { color: #4b5563; }
 
@@ -539,5 +549,6 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   svg [stroke="#6ee7b7"], svg [fill="#6ee7b7"] { stroke: #059669 !important; fill: #059669 !important; }
   svg [stroke="#f87171"], svg [fill="#f87171"] { stroke: #dc2626 !important; fill: #dc2626 !important; }
   svg [stroke="#60a5fa"], svg [fill="#60a5fa"] { stroke: #2563eb !important; fill: #2563eb !important; }
+  svg [stroke="#a78bfa"], svg [fill="#a78bfa"] { stroke: #7c3aed !important; fill: #7c3aed !important; }
   svg stop[stop-color="#6ee7b7"] { stop-color: #059669 !important; }
 }

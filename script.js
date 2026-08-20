@@ -609,6 +609,118 @@
     svg.appendChild(gapSub);
   }
 
+  function renderPaybackChart(totals) {
+    const svg = $("#chartPayback");
+    if (!svg) return;
+    clearSvg(svg);
+
+    const note = $("#notePayback");
+    const { solutionMonthlyCost, paybackMonths, executionMonths } = totals;
+
+    if (solutionMonthlyCost <= 0) {
+      if (note) note.textContent = "Ingresa el costo mensual de la solución arriba para ver el punto de equilibrio.";
+      return;
+    }
+    if (paybackMonths === null) {
+      if (note) note.textContent = "Con los datos actuales, el punto de equilibrio no se alcanza dentro del periodo proyectado. Prueba aumentando los años a proyectar.";
+      return;
+    }
+
+    const W = 600, H = 300;
+    const padL = 60, padR = 108, padT = 30, padB = 40;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+
+    const processData = totals.cumulativeProcessCostSeries;
+    const realData = totals.cumulativeRealSpendSeries;
+    const n = processData.length;
+    const maxVal = Math.max(...processData, ...realData, 1) * 1.15;
+
+    drawAxes(svg, padL, padR, padT, padB, W, chartW, chartH, maxVal);
+
+    const xFor = (i) => padL + (n === 1 ? chartW / 2 : (chartW * i) / (n - 1));
+    const yFor = (val) => padT + chartH - (chartH * val) / maxVal;
+
+    const processPoints = processData.map((val, i) => [xFor(i), yFor(val)]);
+    const realPoints = realData.map((val, i) => [xFor(i), yFor(val)]);
+
+    const buildLinePath = (points) => {
+      let d = `M ${points[0][0]} ${points[0][1]} `;
+      points.forEach(([x, y]) => (d += `L ${x} ${y} `));
+      return d;
+    };
+
+    svg.appendChild(svgEl("path", {
+      d: buildLinePath(realPoints), fill: "none", stroke: "#a78bfa", "stroke-width": 2.5,
+      "stroke-linecap": "round", "stroke-linejoin": "round",
+    }));
+    svg.appendChild(svgEl("path", {
+      d: buildLinePath(processPoints), fill: "none", stroke: "#f87171", "stroke-width": 2.5,
+      "stroke-linecap": "round", "stroke-linejoin": "round",
+    }));
+
+    const tickIndices = xTicksForMonths(n);
+    tickIndices.forEach((i) => {
+      svg.appendChild(svgEl("circle", { cx: processPoints[i][0], cy: processPoints[i][1], r: 4, fill: "#f87171" }));
+      svg.appendChild(svgEl("circle", { cx: realPoints[i][0], cy: realPoints[i][1], r: 4, fill: "#a78bfa" }));
+
+      const xLabel = svgEl("text", {
+        x: xFor(i), y: padT + chartH + 20, "text-anchor": "middle", fill: "#93a0c2", "font-size": 11,
+      });
+      xLabel.textContent = monthLabel(i);
+      svg.appendChild(xLabel);
+    });
+
+    // legend
+    const legendY = 12;
+    svg.appendChild(svgEl("rect", { x: padL, y: legendY, width: 10, height: 10, fill: "#f87171", rx: 2 }));
+    const l1 = svgEl("text", { x: padL + 16, y: legendY + 9, fill: "#93a0c2", "font-size": 11 });
+    l1.textContent = "Costo proceso (sin intervención)";
+    svg.appendChild(l1);
+
+    svg.appendChild(svgEl("rect", { x: padL + 190, y: legendY, width: 10, height: 10, fill: "#a78bfa", rx: 2 }));
+    const l2 = svgEl("text", { x: padL + 206, y: legendY + 9, fill: "#93a0c2", "font-size": 11 });
+    l2.textContent = "Gasto real acumulado";
+    svg.appendChild(l2);
+
+    // punto de equilibrio: marcador destacado + cruces punteadas a los dos ejes
+    const breakevenX = padL + (n === 1 ? chartW / 2 : (chartW * paybackMonths) / (n - 1));
+    const breakevenY = yFor(totals.totalRealInvestment);
+
+    svg.appendChild(svgEl("line", {
+      x1: breakevenX, x2: breakevenX, y1: breakevenY, y2: padT + chartH,
+      stroke: "#6ee7b7", "stroke-width": 1.5, "stroke-dasharray": "4,4",
+    }));
+    svg.appendChild(svgEl("line", {
+      x1: padL, x2: breakevenX, y1: breakevenY, y2: breakevenY,
+      stroke: "#6ee7b7", "stroke-width": 1.5, "stroke-dasharray": "4,4",
+    }));
+    svg.appendChild(svgEl("circle", {
+      cx: breakevenX, cy: breakevenY, r: 6, fill: "#6ee7b7", stroke: "#0f172a", "stroke-width": 2,
+    }));
+
+    const labelAboveLine = breakevenY > padT + 40;
+    const beLabel1 = svgEl("text", {
+      x: breakevenX, y: labelAboveLine ? breakevenY - 16 : breakevenY + 22,
+      "text-anchor": breakevenX > W - 130 ? "end" : "middle",
+      fill: "#e8ecf7", "font-size": 11, "font-weight": 700,
+    });
+    beLabel1.textContent = "Punto de equilibrio";
+    svg.appendChild(beLabel1);
+
+    const beLabel2 = svgEl("text", {
+      x: breakevenX, y: labelAboveLine ? breakevenY - 3 : breakevenY + 35,
+      "text-anchor": breakevenX > W - 130 ? "end" : "middle",
+      fill: "#6ee7b7", "font-size": 10.5, "font-weight": 600,
+    });
+    beLabel2.textContent = "Mes " + fmtHours(paybackMonths) + " · " + shortMoney(totals.totalRealInvestment);
+    svg.appendChild(beLabel2);
+
+    if (note) {
+      note.textContent = `El punto de equilibrio se alcanza en el mes ${fmtHours(paybackMonths)}, cuando el costo acumulado del proceso (línea roja) supera el gasto real acumulado de $${Math.round(totals.totalRealInvestment).toLocaleString("es-CO")} pagado durante los ${executionMonths} ${executionMonths === 1 ? "mes" : "meses"} de implementación (línea morada).`;
+    }
+  }
+
   function shortMoney(n) {
     if (!isFinite(n)) n = 0;
     const abs = Math.abs(n);
@@ -641,6 +753,7 @@
     renderCompareChart(totals);
     renderSolutionKPIs(totals);
     renderPaybackTable(totals);
+    renderPaybackChart(totals);
     renderNotes(totals);
   }
 

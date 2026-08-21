@@ -396,7 +396,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 }
 
 .kpi-card-emphasis {
-  background: #141c30;
+  background: #0f1524;
   border-color: var(--card-border);
 }
 

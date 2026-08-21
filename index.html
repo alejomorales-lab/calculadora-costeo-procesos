@@ -50,10 +50,29 @@
         </select>
       </div>
       <div class="field">
-        <label class="field-label" for="solutionCost">Costo mensual de la solución</label>
-        <div class="input-prefix">
-          <span>$</span>
-          <input type="text" inputmode="numeric" id="solutionCost" placeholder="0" value="0">
+        <label class="field-label">Costo mensual de la solución</label>
+        <div class="mode-toggle">
+          <button type="button" class="mode-toggle-btn active" id="btnModeFixed" data-mode="fixed">Monto fijo</button>
+          <button type="button" class="mode-toggle-btn" id="btnModePct" data-mode="percentage">% del proceso</button>
+        </div>
+        <select id="solutionCostMode" class="hidden">
+          <option value="fixed" selected>fixed</option>
+          <option value="percentage">percentage</option>
+        </select>
+
+        <div id="solutionCostFixedField">
+          <div class="input-prefix">
+            <span>$</span>
+            <input type="text" inputmode="numeric" id="solutionCost" placeholder="0" value="0">
+          </div>
+        </div>
+
+        <div id="solutionCostPctField" class="hidden">
+          <div class="input-prefix suffix">
+            <input type="number" id="solutionPct" min="0" max="100" step="0.1" value="50">
+            <span>%</span>
+          </div>
+          <span class="field-hint" id="solutionPctEstimate"></span>
         </div>
       </div>
       <div class="field">
@@ -197,6 +216,11 @@
         <label class="field-label" for="cfgWorkDaysMonth">Días laborales por mes (si se ingresan horas/día)</label>
         <input type="number" id="cfgWorkDaysMonth" min="1" step="0.1" value="21.67">
         <span class="field-hint">Promedio de días hábiles al mes en Colombia.</span>
+      </div>
+      <div class="field">
+        <label class="field-label" for="cfgSolutionPct">Porcentaje de solución por defecto (%)</label>
+        <input type="number" id="cfgSolutionPct" min="0" max="100" step="0.1" value="50">
+        <span class="field-hint">Cuando el costo de la solución se ingresa como porcentaje, este es el valor inicial sugerido (% del costo total del proceso en el periodo proyectado).</span>
       </div>
     </div>
     <div class="modal-footer">

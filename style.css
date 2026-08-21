@@ -171,6 +171,38 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 }
 .input-prefix input:focus { border: none; }
 
+.input-prefix.suffix span {
+  margin-right: 0;
+  margin-left: 4px;
+}
+
+.mode-toggle {
+  display: flex;
+  background: var(--bg-elev);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 10px;
+  gap: 3px;
+}
+
+.mode-toggle-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.mode-toggle-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #0f172a;
+}
+
 .hours-input {
   display: grid;
   grid-template-columns: 1fr 110px;

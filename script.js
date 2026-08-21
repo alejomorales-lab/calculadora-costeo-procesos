@@ -6,6 +6,7 @@
     weeklyHours: 42,
     annualIncrease: 6,
     workDaysMonth: 21.67,
+    solutionPct: 50,
   };
 
   const WEEKS_PER_MONTH = 4.33;
@@ -152,33 +153,54 @@
     });
 
     const years = parseInt($("#projectionYears").value, 10) || 1;
-    const solutionMonthlyCost = parseThousands($("#solutionCost").value);
     const executionMonths = parseInt($("#executionMonths").value, 10) || 1;
 
     const annualIncreaseRate = settings.annualIncrease / 100;
 
     const totalMonths = years * 12;
     const monthlyProcessCostSeries = [];
-    const monthlySolutionCostSeries = [];
     for (let m = 0; m < totalMonths; m++) {
       // Escalón anual: el costo se mantiene fijo durante los 12 meses del año y solo sube
       // al iniciar el siguiente año (no se reparte el incremento mes a mes).
       const yearIndex = Math.floor(m / 12);
       const processCostThisMonth = totalMonthlyProcessCost * Math.pow(1 + annualIncreaseRate, yearIndex);
       monthlyProcessCostSeries.push(processCostThisMonth);
+    }
+
+    const cumulativeProcessCostSeries = [];
+    let runningProcess = 0;
+    for (let m = 0; m < totalMonths; m++) {
+      runningProcess += monthlyProcessCostSeries[m];
+      cumulativeProcessCostSeries.push(runningProcess);
+    }
+
+    const totalProjectedProcessCost = cumulativeProcessCostSeries[totalMonths - 1] || 0;
+
+    // Costo mensual de la solución: monto fijo, o % del costo total del proceso durante todo el
+    // periodo proyectado, repartido entre los meses de ejecución.
+    const solutionCostModeEl = $("#solutionCostMode");
+    const solutionCostMode = solutionCostModeEl ? solutionCostModeEl.value : "fixed";
+    let solutionMonthlyCost;
+    let solutionPct = null;
+    if (solutionCostMode === "percentage") {
+      solutionPct = parseFloat($("#solutionPct").value) || 0;
+      const totalSolutionBudget = (solutionPct / 100) * totalProjectedProcessCost;
+      solutionMonthlyCost = executionMonths > 0 ? totalSolutionBudget / executionMonths : 0;
+    } else {
+      solutionMonthlyCost = parseThousands($("#solutionCost").value);
+    }
+
+    const monthlySolutionCostSeries = [];
+    for (let m = 0; m < totalMonths; m++) {
       // La solución solo genera costo durante sus meses de ejecución (inversión de implementación);
       // después de eso no se repite más.
       monthlySolutionCostSeries.push(m < executionMonths ? solutionMonthlyCost : 0);
     }
 
-    const cumulativeProcessCostSeries = [];
     const cumulativeSolutionCostSeries = [];
-    let runningProcess = 0;
     let runningSolution = 0;
     for (let m = 0; m < totalMonths; m++) {
-      runningProcess += monthlyProcessCostSeries[m];
       runningSolution += monthlySolutionCostSeries[m];
-      cumulativeProcessCostSeries.push(runningProcess);
       cumulativeSolutionCostSeries.push(runningSolution);
     }
 
@@ -236,6 +258,9 @@
       years,
       totalMonths,
       solutionMonthlyCost,
+      solutionCostMode,
+      solutionPct,
+      totalProjectedProcessCost,
       executionMonths,
       monthlyProcessCostSeries,
       monthlySolutionCostSeries,
@@ -792,6 +817,7 @@
     renderSolutionKPIs(totals);
     renderPaybackTable(totals);
     renderPaybackChart(totals);
+    renderSolutionPctEstimate(totals);
     renderNotes(totals);
   }
 
@@ -802,6 +828,7 @@
     $("#cfgWeeklyHours").value = settings.weeklyHours;
     $("#cfgAnnualIncrease").value = settings.annualIncrease;
     $("#cfgWorkDaysMonth").value = settings.workDaysMonth;
+    $("#cfgSolutionPct").value = settings.solutionPct;
     $("#settingsModal").classList.remove("hidden");
   }
 
@@ -810,10 +837,19 @@
   }
 
   function applySettings() {
+    const previousSolutionPct = settings.solutionPct;
+
     settings.factor = parseFloat($("#cfgFactor").value) || DEFAULTS.factor;
     settings.weeklyHours = parseFloat($("#cfgWeeklyHours").value) || DEFAULTS.weeklyHours;
     settings.annualIncrease = parseFloat($("#cfgAnnualIncrease").value) || 0;
     settings.workDaysMonth = parseFloat($("#cfgWorkDaysMonth").value) || DEFAULTS.workDaysMonth;
+    settings.solutionPct = parseFloat($("#cfgSolutionPct").value) || DEFAULTS.solutionPct;
+
+    const solutionPctInput = $("#solutionPct");
+    if (parseFloat(solutionPctInput.value) === previousSolutionPct) {
+      solutionPctInput.value = settings.solutionPct;
+    }
+
     closeSettings();
     recalculate();
   }
@@ -821,6 +857,27 @@
   function resetDefaults() {
     settings = { ...DEFAULTS };
     openSettings();
+  }
+
+  // ---------- Modo de costo de la solución (monto fijo / % del proceso) ----------
+
+  function setSolutionCostMode(mode) {
+    $("#solutionCostMode").value = mode;
+    $("#btnModeFixed").classList.toggle("active", mode === "fixed");
+    $("#btnModePct").classList.toggle("active", mode === "percentage");
+    $("#solutionCostFixedField").classList.toggle("hidden", mode !== "fixed");
+    $("#solutionCostPctField").classList.toggle("hidden", mode !== "percentage");
+    recalculate();
+  }
+
+  function renderSolutionPctEstimate(totals) {
+    const el = $("#solutionPctEstimate");
+    if (!el) return;
+    if (totals.solutionCostMode !== "percentage") return;
+    el.textContent =
+      `≈ ${fmtMoney(totals.solutionMonthlyCost)}/mes durante ${totals.executionMonths} ` +
+      `${totals.executionMonths === 1 ? "mes" : "meses"} de ejecución ` +
+      `(${totals.solutionPct}% de ${fmtMoney(totals.totalProjectedProcessCost)}, costo del proceso en el periodo proyectado)`;
   }
 
   // ---------- Reporte PDF ----------
@@ -880,6 +937,10 @@
 
     $("#projectionYears").addEventListener("change", recalculate);
     setupThousandsInput($("#solutionCost"), recalculate);
+    $("#solutionPct").value = settings.solutionPct;
+    $("#solutionPct").addEventListener("input", recalculate);
+    $("#btnModeFixed").addEventListener("click", () => setSolutionCostMode("fixed"));
+    $("#btnModePct").addEventListener("click", () => setSolutionCostMode("percentage"));
     $("#executionMonths").addEventListener("change", recalculate);
     $("#processName").addEventListener("input", () => {});
     $("#processName").addEventListener("focus", () => {

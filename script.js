@@ -213,9 +213,12 @@
     // Después de la ejecución, el gasto real se detiene (la solución ya reemplazó al proceso).
     // Esta es la base de TODOS los cálculos de ahorro/payback del informe — nunca se compara
     // el proceso solo contra el costo de la solución sola, siempre contra el gasto real combinado.
+    // Si no hay costo de solución (monto fijo en $0 o porcentaje en 0%), no se ha propuesto
+    // ninguna solución: no hay nada que implementar ni gasto en paralelo que contar.
+    const hasProposedSolution = solutionMonthlyCost > 0;
     const realSpendSeries = [];
     for (let m = 0; m < totalMonths; m++) {
-      realSpendSeries.push(m < executionMonths ? monthlyProcessCostSeries[m] + solutionMonthlyCost : 0);
+      realSpendSeries.push(hasProposedSolution && m < executionMonths ? monthlyProcessCostSeries[m] + solutionMonthlyCost : 0);
     }
     const cumulativeRealSpendSeries = [];
     let runningReal = 0;
@@ -360,7 +363,9 @@
         label: "Costo total de implementación",
         value: fmtMoney(totalRealInvestment),
         cls: "neutral",
-        sub: `${fmtMoney(totalSolutionInvestment)} de la solución + proceso pagado en paralelo durante ${executionMonths} ${executionMonths === 1 ? "mes" : "meses"}`,
+        sub: hasSolution
+          ? `${fmtMoney(totalSolutionInvestment)} de la solución + proceso pagado en paralelo durante ${executionMonths} ${executionMonths === 1 ? "mes" : "meses"}`
+          : "Ingresa el costo de la solución",
       },
       {
         label: "Ahorro anual con la solución",

@@ -445,6 +445,9 @@
 
     monthlyProcessCostSeries.forEach((processCost, i) => {
       const isExecution = i < executionMonths;
+      // Costo real del proceso: se detiene al terminar la implementación (la solución ya lo reemplazó).
+      // No confundir con el acumulado "sin intervención", que es la línea base hipotética y sigue creciendo.
+      const realProcessCostThisMonth = isExecution ? processCost : 0;
       const solutionCostThisMonth = isExecution ? solutionMonthlyCost : 0;
       const realCumulative = cumulativeRealSpendSeries[i];
       const baselineCumulative = cumulativeProcessCostSeries[i];
@@ -455,10 +458,10 @@
 
       tr.innerHTML = `
         <td>${monthLabel(i)}</td>
-        <td>${fmtMoney(processCost)}</td>
+        <td>${realProcessCostThisMonth > 0 ? fmtMoney(realProcessCostThisMonth) : "$0"}</td>
         <td>${solutionCostThisMonth > 0 ? fmtMoney(solutionCostThisMonth) : "—"}</td>
         <td>${fmtMoney(realCumulative)}</td>
-        <td>${fmtMoney(baselineCumulative)}</td>
+        <td class="col-baseline-danger">${fmtMoney(baselineCumulative)}</td>
         <td>${isPaybackRow ? "✓ Punto de equilibrio" : (isExecution ? "Implementación" : "")}</td>
       `;
       tbody.appendChild(tr);

@@ -534,6 +534,11 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   border-bottom: none;
 }
 
+.payback-table tbody td.col-baseline-danger {
+  color: var(--danger);
+  font-weight: 600;
+}
+
 .payback-table tbody tr:nth-child(even) {
   background: rgba(255, 255, 255, 0.02);
 }
@@ -734,6 +739,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   .table-wrap { max-height: none; overflow: visible; border-color: #d1d5db; }
   .payback-table thead th { background: #f3f4f6; color: #374151; }
   .payback-table tbody td { color: #111827; border-color: #e5e7eb; }
+  .payback-table tbody td.col-baseline-danger { color: #dc2626; }
   .payback-table tbody tr.payback-row td { background: #d1fae5; color: #065f46; }
 
   svg [fill="#93a0c2"] { fill: #4b5563 !important; }

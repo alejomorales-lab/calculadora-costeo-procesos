@@ -174,18 +174,14 @@
       cumulativeProcessCostSeries.push(runningProcess);
     }
 
-    const totalProjectedProcessCost = cumulativeProcessCostSeries[totalMonths - 1] || 0;
-
-    // Costo mensual de la solución: monto fijo, o % del costo total del proceso durante todo el
-    // periodo proyectado, repartido entre los meses de ejecución.
+    // Costo mensual de la solución: monto fijo, o % del costo mensual actual del proceso.
     const solutionCostModeEl = $("#solutionCostMode");
     const solutionCostMode = solutionCostModeEl ? solutionCostModeEl.value : "fixed";
     let solutionMonthlyCost;
     let solutionPct = null;
     if (solutionCostMode === "percentage") {
       solutionPct = parseFloat($("#solutionPct").value) || 0;
-      const totalSolutionBudget = (solutionPct / 100) * totalProjectedProcessCost;
-      solutionMonthlyCost = executionMonths > 0 ? totalSolutionBudget / executionMonths : 0;
+      solutionMonthlyCost = (solutionPct / 100) * totalMonthlyProcessCost;
     } else {
       solutionMonthlyCost = parseThousands($("#solutionCost").value);
     }
@@ -260,7 +256,6 @@
       solutionMonthlyCost,
       solutionCostMode,
       solutionPct,
-      totalProjectedProcessCost,
       executionMonths,
       monthlyProcessCostSeries,
       monthlySolutionCostSeries,
@@ -874,10 +869,10 @@
     const el = $("#solutionPctEstimate");
     if (!el) return;
     if (totals.solutionCostMode !== "percentage") return;
+    const totalOverExecution = totals.solutionMonthlyCost * totals.executionMonths;
     el.textContent =
-      `≈ ${fmtMoney(totals.solutionMonthlyCost)}/mes durante ${totals.executionMonths} ` +
-      `${totals.executionMonths === 1 ? "mes" : "meses"} de ejecución ` +
-      `(${totals.solutionPct}% de ${fmtMoney(totals.totalProjectedProcessCost)}, costo del proceso en el periodo proyectado)`;
+      `${fmtMoney(totals.solutionMonthlyCost)}/mes (${totals.solutionPct}% de ${fmtMoney(totals.totalMonthlyProcessCost)}, costo mensual del proceso) ` +
+      `× ${totals.executionMonths} ${totals.executionMonths === 1 ? "mes" : "meses"} de ejecución = ${fmtMoney(totalOverExecution)} total`;
   }
 
   // ---------- Reporte PDF ----------

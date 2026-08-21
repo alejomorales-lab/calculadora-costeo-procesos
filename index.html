@@ -53,7 +53,7 @@
         <label class="field-label" for="solutionCost">Costo mensual de la solución</label>
         <div class="input-prefix">
           <span>$</span>
-          <input type="number" id="solutionCost" min="0" step="1000" placeholder="0" value="0">
+          <input type="text" inputmode="numeric" id="solutionCost" placeholder="0" value="0">
         </div>
       </div>
       <div class="field">
@@ -217,7 +217,7 @@
         <label class="field-label">Salario mensual</label>
         <div class="input-prefix">
           <span>$</span>
-          <input type="number" class="person-salary" min="0" step="10000" value="0">
+          <input type="text" inputmode="numeric" class="person-salary" value="0">
         </div>
       </div>
       <div class="field">
@@ -232,9 +232,18 @@
       </div>
     </div>
     <div class="person-result">
-      <span class="person-result-item"><strong class="res-monthly-cost">$0</strong> costo mensual empresa</span>
-      <span class="person-result-item"><strong class="res-monthly-hours">0</strong> h/mes en el proceso</span>
-      <span class="person-result-item"><strong class="res-time-pct">0%</strong> de su tiempo laboral</span>
+      <div class="person-result-item">
+        <div class="person-result-value res-monthly-cost">$0</div>
+        <div class="person-result-label">Costo mensual empresa</div>
+      </div>
+      <div class="person-result-item">
+        <div class="person-result-value res-monthly-hours">0</div>
+        <div class="person-result-label">h/mes en el proceso</div>
+      </div>
+      <div class="person-result-item">
+        <div class="person-result-value res-time-pct">0%</div>
+        <div class="person-result-label">de su tiempo laboral</div>
+      </div>
     </div>
   </div>
 </template>

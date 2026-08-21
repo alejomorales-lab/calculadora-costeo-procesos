@@ -31,6 +31,27 @@
     return n.toLocaleString("es-CO", { maximumFractionDigits: 1 });
   };
 
+  const formatThousands = (n) => {
+    if (!isFinite(n)) return "";
+    return Math.round(n).toLocaleString("es-CO");
+  };
+
+  const parseThousands = (str) => {
+    const digits = (str || "").replace(/[^\d]/g, "");
+    return digits ? parseInt(digits, 10) : 0;
+  };
+
+  const setupThousandsInput = (input, onChange) => {
+    input.addEventListener("input", () => {
+      const caretFromEnd = input.value.length - input.selectionStart;
+      const value = parseThousands(input.value);
+      input.value = value ? formatThousands(value) : "";
+      const newPos = Math.max(0, input.value.length - caretFromEnd);
+      input.setSelectionRange(newPos, newPos);
+      onChange(value);
+    });
+  };
+
   // ---------- People management ----------
 
   function addPerson(prefill) {
@@ -69,15 +90,20 @@
       const removeBtn = node.querySelector(".remove-person");
 
       nameInput.value = person.name;
-      salaryInput.value = person.salary;
+      salaryInput.value = person.salary ? formatThousands(person.salary) : "";
       hoursInput.value = person.hours;
       unitSelect.value = person.unit;
 
+      nameInput.addEventListener("focus", () => {
+        if (/^Persona \d+$/.test(nameInput.value)) {
+          nameInput.value = "";
+        }
+      });
       nameInput.addEventListener("input", () => {
         person.name = nameInput.value;
       });
-      salaryInput.addEventListener("input", () => {
-        person.salary = parseFloat(salaryInput.value) || 0;
+      setupThousandsInput(salaryInput, (value) => {
+        person.salary = value;
         recalculate();
       });
       hoursInput.addEventListener("input", () => {
@@ -126,7 +152,7 @@
     });
 
     const years = parseInt($("#projectionYears").value, 10) || 1;
-    const solutionMonthlyCost = parseFloat($("#solutionCost").value) || 0;
+    const solutionMonthlyCost = parseThousands($("#solutionCost").value);
     const executionMonths = parseInt($("#executionMonths").value, 10) || 1;
 
     const annualIncreaseRate = settings.annualIncrease / 100;
@@ -853,13 +879,16 @@
     });
 
     $("#projectionYears").addEventListener("change", recalculate);
-    $("#solutionCost").addEventListener("input", recalculate);
+    setupThousandsInput($("#solutionCost"), recalculate);
     $("#executionMonths").addEventListener("change", recalculate);
     $("#processName").addEventListener("input", () => {});
+    $("#processName").addEventListener("focus", () => {
+      const processName = $("#processName");
+      if (processName.value === "Mi proceso") processName.value = "";
+    });
     $("#btnGeneratePDF").addEventListener("click", generatePDF);
 
-    renderPeople();
-    recalculate();
+    addPerson();
   }
 
   document.addEventListener("DOMContentLoaded", init);

@@ -39,59 +39,64 @@
   <section class="card no-print">
     <h2>Proyección y solución</h2>
     <div class="grid-2">
-      <div class="field">
-        <label class="field-label" for="projectionYears">Años a proyectar</label>
-        <select id="projectionYears">
-          <option value="1" selected>1 año</option>
-          <option value="2">2 años</option>
-          <option value="3">3 años</option>
-          <option value="4">4 años</option>
-          <option value="5">5 años</option>
-        </select>
-      </div>
-      <div class="field">
-        <label class="field-label">Costo mensual de la solución</label>
-        <div class="mode-toggle">
-          <button type="button" class="mode-toggle-btn active" id="btnModeFixed" data-mode="fixed">Monto fijo</button>
-          <button type="button" class="mode-toggle-btn" id="btnModePct" data-mode="percentage">% del proceso</button>
+      <div class="field-group">
+        <div class="field">
+          <label class="field-label" for="projectionYears">Años a proyectar</label>
+          <select id="projectionYears">
+            <option value="1" selected>1 año</option>
+            <option value="2">2 años</option>
+            <option value="3">3 años</option>
+            <option value="4">4 años</option>
+            <option value="5">5 años</option>
+          </select>
         </div>
-        <select id="solutionCostMode" class="hidden">
-          <option value="fixed" selected>fixed</option>
-          <option value="percentage">percentage</option>
-        </select>
-
-        <div id="solutionCostFixedField">
-          <div class="input-prefix">
-            <span>$</span>
-            <input type="text" inputmode="numeric" id="solutionCost" placeholder="0" value="0">
-          </div>
-        </div>
-
-        <div id="solutionCostPctField" class="hidden">
-          <div class="input-prefix suffix">
-            <input type="number" id="solutionPct" min="0" max="100" step="0.1" value="50">
-            <span>%</span>
-          </div>
-          <span class="field-hint" id="solutionPctEstimate"></span>
+        <div class="field">
+          <label class="field-label" for="executionMonths">Tiempo de ejecución de la solución</label>
+          <select id="executionMonths">
+            <option value="1">1 mes</option>
+            <option value="2">2 meses</option>
+            <option value="3" selected>3 meses</option>
+            <option value="4">4 meses</option>
+            <option value="5">5 meses</option>
+            <option value="6">6 meses</option>
+            <option value="7">7 meses</option>
+            <option value="8">8 meses</option>
+            <option value="9">9 meses</option>
+            <option value="10">10 meses</option>
+            <option value="11">11 meses</option>
+            <option value="12">12 meses</option>
+          </select>
+          <span class="field-hint">Es el número de meses en que se paga el costo mensual de la solución (inversión de implementación). Al terminar, ese costo no se repite más.</span>
         </div>
       </div>
-      <div class="field">
-        <label class="field-label" for="executionMonths">Tiempo de ejecución de la solución</label>
-        <select id="executionMonths">
-          <option value="1">1 mes</option>
-          <option value="2">2 meses</option>
-          <option value="3" selected>3 meses</option>
-          <option value="4">4 meses</option>
-          <option value="5">5 meses</option>
-          <option value="6">6 meses</option>
-          <option value="7">7 meses</option>
-          <option value="8">8 meses</option>
-          <option value="9">9 meses</option>
-          <option value="10">10 meses</option>
-          <option value="11">11 meses</option>
-          <option value="12">12 meses</option>
-        </select>
-        <span class="field-hint">Es el número de meses en que se paga el costo mensual de la solución (inversión de implementación). Al terminar, ese costo no se repite más.</span>
+
+      <div class="field-group">
+        <div class="field">
+          <label class="field-label">Costo mensual de la solución</label>
+          <div class="mode-toggle">
+            <button type="button" class="mode-toggle-btn active" id="btnModeFixed" data-mode="fixed">Monto fijo</button>
+            <button type="button" class="mode-toggle-btn" id="btnModePct" data-mode="percentage">% del proceso</button>
+          </div>
+          <select id="solutionCostMode" class="hidden">
+            <option value="fixed" selected>fixed</option>
+            <option value="percentage">percentage</option>
+          </select>
+
+          <div id="solutionCostFixedField">
+            <div class="input-prefix">
+              <span>$</span>
+              <input type="text" inputmode="numeric" id="solutionCost" placeholder="0" value="0">
+            </div>
+          </div>
+
+          <div id="solutionCostPctField" class="hidden">
+            <div class="input-prefix suffix">
+              <input type="number" id="solutionPct" min="0" max="100" step="0.1" value="50">
+              <span>%</span>
+            </div>
+            <span class="field-hint" id="solutionPctEstimate"></span>
+          </div>
+        </div>
       </div>
     </div>
   </section>

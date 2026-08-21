@@ -1,4 +1,4 @@
-# Calculadora de Costeo de Procesos
+# Calculadora de Tiempo Invertido
 
 Calculadora web (HTML/CSS/JS, sin dependencias) para estimar cuánto le cuesta a una compañía un proceso ejecutado por una o varias personas, bajo legislación colombiana, y compararlo contra el costo de una solución/automatización.
 

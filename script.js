@@ -284,10 +284,10 @@
   // ---------- Rendering: per-person mini results ----------
 
   function renderPersonResults(perPersonResults) {
-    perPersonResults.forEach(({ person, monthlyCompanyCost, monthlyProcessHours, timeInvestedPct }) => {
+    perPersonResults.forEach(({ person, monthlyProcessCost, monthlyProcessHours, timeInvestedPct }) => {
       const row = peopleList.querySelector(`.person-row[data-id="${person.id}"]`);
       if (!row) return;
-      row.querySelector(".res-monthly-cost").textContent = fmtMoney(monthlyCompanyCost);
+      row.querySelector(".res-monthly-cost").textContent = fmtMoney(monthlyProcessCost);
       row.querySelector(".res-monthly-hours").textContent = fmtHours(monthlyProcessHours);
       row.querySelector(".res-time-pct").textContent = fmtHours(timeInvestedPct) + "%";
     });

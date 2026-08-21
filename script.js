@@ -300,25 +300,26 @@
       {
         label: "Costo anual del proceso",
         value: fmtMoney(totalAnnualProcessCostYear1),
-        cls: "neutral",
+        cls: "negative",
         sub: "Costo total año 1",
+        highlight: true,
       },
       {
         label: "Horas invertidas al año",
         value: fmtHours(totalAnnualHours) + " h",
-        cls: "neutral",
+        cls: "negative",
         sub: fmtHours(totalAnnualHours / 12) + " h/mes",
       },
       {
         label: "Costo mensual del proceso",
         value: fmtMoney(totalMonthlyProcessCost),
-        cls: "neutral",
+        cls: "negative",
         sub: "Todas las personas incluidas",
       },
       {
         label: "Porcentaje total de tiempo dedicada al proceso",
         value: fmtHours(totalTimeInvestedPct) + "%",
-        cls: "neutral",
+        cls: "negative",
         sub: "Sobre el tiempo laboral de todas las personas",
       },
     ];
@@ -326,7 +327,7 @@
     kpiGrid.innerHTML = "";
     cards.forEach((c) => {
       const el = document.createElement("div");
-      el.className = "kpi-card";
+      el.className = "kpi-card" + (c.highlight ? " kpi-card-emphasis" : "");
       el.innerHTML = `
         <div class="kpi-label">${c.label}</div>
         <div class="kpi-value ${c.cls}">${c.value}</div>

@@ -395,6 +395,11 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   border-color: var(--accent-2);
 }
 
+.kpi-card-emphasis {
+  background: #141c30;
+  border-color: var(--card-border);
+}
+
 .kpi-label {
   font-size: 11.5px;
   color: var(--text-dim);
@@ -722,6 +727,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 
   .kpi-card { background: #ffffff; border: 1px solid #d1d5db; }
   .kpi-card-highlight { background: #eff6ff; border-color: #2563eb; }
+  .kpi-card-emphasis { background: #fef2f2; border-color: #dc2626; }
 
   .kpi-value.positive { color: #047857; }
   .kpi-value.negative { color: #b91c1c; }

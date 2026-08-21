@@ -452,6 +452,7 @@
       const realCumulative = cumulativeRealSpendSeries[i];
       const baselineCumulative = cumulativeProcessCostSeries[i];
       const isPaybackRow = paybackMonthIndex !== null && i === paybackMonthIndex;
+      const isPastPayback = paybackMonthIndex !== null && i > paybackMonthIndex;
 
       const tr = document.createElement("tr");
       if (isPaybackRow) tr.className = "payback-row";
@@ -460,7 +461,7 @@
         <td>${monthLabel(i)}</td>
         <td>${realProcessCostThisMonth > 0 ? fmtMoney(realProcessCostThisMonth) : "$0"}</td>
         <td>${solutionCostThisMonth > 0 ? fmtMoney(solutionCostThisMonth) : "—"}</td>
-        <td>${fmtMoney(realCumulative)}</td>
+        <td>${isPastPayback ? "—" : fmtMoney(realCumulative)}</td>
         <td class="col-baseline-danger">${fmtMoney(baselineCumulative)}</td>
         <td>${isPaybackRow ? "✓ Punto de equilibrio" : (isExecution ? "Implementación" : "")}</td>
       `;

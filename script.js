@@ -928,9 +928,29 @@
     window.print();
   }
 
+  // ---------- Fecha de última actualización (deploy) ----------
+
+  async function renderLastUpdate() {
+    const el = $("#lastUpdate");
+    if (!el) return;
+    try {
+      const res = await fetch(location.href, { method: "HEAD", cache: "no-store" });
+      const header = res.headers.get("Last-Modified");
+      const date = header ? new Date(header) : null;
+      if (!date || isNaN(date)) return;
+      const formatted = date.toLocaleString("es-CO", {
+        day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit",
+      });
+      el.textContent = `Última actualización: ${formatted}`;
+    } catch (_) {
+      // Sin red o abierto como archivo local: se omite la línea.
+    }
+  }
+
   // ---------- Init ----------
 
   function init() {
+    renderLastUpdate();
     $("#btnAddPerson").addEventListener("click", () => addPerson());
     $("#btnSettings").addEventListener("click", openSettings);
     $("#btnCloseSettings").addEventListener("click", closeSettings);

@@ -549,6 +549,20 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   font-weight: 700;
 }
 
+.app-footer {
+  max-width: 720px;
+  margin: 4px auto 0;
+  padding: 0 16px;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--text-dim);
+  opacity: 0.8;
+}
+
+.app-footer p { margin: 0; }
+.app-footer p:empty { display: none; }
+
 .print-only { display: none; }
 
 @media print {
